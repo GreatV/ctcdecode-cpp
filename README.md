@@ -7,20 +7,12 @@ A ctc decoder implemented in C++, compiled into a dynamic link library, and expo
 git clone https://github.com/Kevindurant111/ctcdecode-cpp.git
 cd ctcdecode-cpp/
 
-# fetch kenlm and ThreadPool
+# fetch kenlm, openfst and ThreadPool
 git submodule init
 git submodule update
 
 # install bz2 and lzma
 sudo apt-get install libbz2-dev liblzma-dev
-
-# download and compile openfst
-wget http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-1.6.3.tar.gz
-tar -xzvf openfst-1.6.3.tar.gz
-cd openfst-1.6.3/
-./configure
-make
-cd ..
 
 mkdir build && cd build
 # Please replace xxx with an absolute path to openfst-1.6.3/src
@@ -37,5 +29,3 @@ target_link_libraries(${PROJECT_NAME} xxx)
 ```   
 ## License  
 This project is licensed under the MIT License. Please include the copyright and license notice of this project when using it.
-
-

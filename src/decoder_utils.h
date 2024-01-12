@@ -24,8 +24,10 @@ const float NUM_FLT_MIN = std::numeric_limits<float>::min();
 
 // inline function for validation check
 inline void check(bool x, const char *expr, const char *file, int line,
-                  const char *err) {
-  if (!x) {
+                  const char *err)
+{
+  if (!x)
+  {
     std::cout << "[" << file << ":" << line << "] ";
     LOG(FATAL) << "\"" << expr << "\" check failed. " << err;
   }
@@ -40,23 +42,28 @@ inline void check(bool x, const char *expr, const char *file, int line,
 // Function template for comparing two pairs
 template <typename T1, typename T2>
 bool pair_comp_first_rev(const std::pair<T1, T2> &a,
-                         const std::pair<T1, T2> &b) {
+                         const std::pair<T1, T2> &b)
+{
   return a.first > b.first;
 }
 
 // Function template for comparing two pairs
 template <typename T1, typename T2>
 bool pair_comp_second_rev(const std::pair<T1, T2> &a,
-                          const std::pair<T1, T2> &b) {
+                          const std::pair<T1, T2> &b)
+{
   return a.second > b.second;
 }
 
 // Return the sum of two probabilities in log scale
 template <typename T>
-T log_sum_exp(const T &x, const T &y) {
+T log_sum_exp(const T &x, const T &y)
+{
   static T num_min = -std::numeric_limits<T>::max();
-  if (x <= num_min) return y;
-  if (y <= num_min) return x;
+  if (x <= num_min)
+    return y;
+  if (y <= num_min)
+    return x;
   T xmax = std::max(x, y);
   return std::log(std::exp(x - xmax) + std::exp(y - xmax)) + xmax;
 }
@@ -103,4 +110,4 @@ bool add_word_to_dictionary(
     const std::string &word,
     const std::unordered_map<std::string, int> &char_map, bool add_space,
     int SPACE_ID, fst::StdVectorFst *dictionary);
-#endif  // DECODER_UTILS_H
+#endif // DECODER_UTILS_H

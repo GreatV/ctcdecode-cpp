@@ -8,14 +8,8 @@ set(CMAKE_CXX_STANDARD 11)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-find_package(OpenFST REQUIRED)
-include_directories(${OPENFST_INCLUDE_DIR})
-
-#find_package(kenlm REQUIRED)
-#include_directories(${KENLM_INCLUDE_DIR})
-
-#add_subdirectory(3rd_party/kenlm/build-shared)
-#include_directories(3rd_party/kenlm/build-shared)
+add_subdirectory(3rd_party/openfst)
+include_directories(3rd_party/openfst/src/include)
 
 include_directories(3rd_party/ThreadPool)
 
@@ -41,18 +35,14 @@ target_include_directories(ctcdecode PUBLIC include)
 add_subdirectory(3rd_party/kenlm)
 include_directories(3rd_party/kenlm)
 
-target_link_libraries(ctcdecode ${OPENFST_LIB})
-target_link_libraries(ctcdecode kenlm)
-#target_link_libraries(ctcdecode kenlm_builder)
-#target_link_libraries(ctcdecode kenlm_interpolate)
-#target_link_libraries(ctcdecode kenlm_filter)
-target_link_libraries(ctcdecode kenlm_util)
+target_link_libraries(ctcdecode fst kenlm)
+# target_link_libraries(ctcdecode kenlm)
+# target_link_libraries(ctcdecode kenlm_builder)
+# target_link_libraries(ctcdecode kenlm_interpolate)
+# target_link_libraries(ctcdecode kenlm_filter)
+# target_link_libraries(ctcdecode kenlm_util)
 
 install(TARGETS ctcdecode
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   )
-  
-
-
-

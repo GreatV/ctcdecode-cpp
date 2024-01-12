@@ -44,9 +44,12 @@ std::vector<std::pair<double, std::vector<int>>> ctc_beam_search_decoder(
     const std::vector<std::vector<double>> &log_probs_seq,
     const std::vector<std::vector<int>> &log_probs_idx, PathTrie &root,
     const bool start, size_t beam_size, int blank_id, int space_id,
-    double cutoff_prob, Scorer *ext_scorer) {
-  if (start) {
-    if (ext_scorer != nullptr && !ext_scorer->is_character_based()) {
+    double cutoff_prob, Scorer *ext_scorer)
+{
+  if (start)
+  {
+    if (ext_scorer != nullptr && !ext_scorer->is_character_based())
+    {
       auto fst_dict = static_cast<fst::StdVectorFst *>(ext_scorer->dictionary);
       fst::StdVectorFst *dict_ptr = fst_dict->Copy(true);
       root.set_dictionary(dict_ptr);
@@ -59,13 +62,15 @@ std::vector<std::pair<double, std::vector<int>>> ctc_beam_search_decoder(
   std::vector<PathTrie *> prefixes;
 
   // update log probs
-  if (root.log_prob_b_prev == -NUM_FLT_INF && start) {
+  if (root.log_prob_b_prev == -NUM_FLT_INF && start)
+  {
     root.score = root.log_prob_b_prev = 0.0;
   }
   root.iterate_to_vec_only(prefixes);
   int prev_id = -1;
   // prefix search over time
-  for (size_t time_step = 0; time_step < timesteps; ++time_step) {
+  for (size_t time_step = 0; time_step < timesteps; ++time_step)
+  {
     float min_cutoff = -NUM_FLT_INF;
     bool full_beam = false;
 
@@ -75,56 +80,72 @@ std::vector<std::pair<double, std::vector<int>>> ctc_beam_search_decoder(
     double top_prob = exp(log_prob[0]);
     auto top_id = log_prob_idx[0];
     if (top_prob >= cutoff_prob && top_id == blank_id)
-      if (prev_id == blank_id) {
-        continue;  // skip this round
-      } else
+      if (prev_id == blank_id)
+      {
+        continue; // skip this round
+      }
+      else
         prev_id = top_id;
     else
       prev_id = -1;
 
     // loop over chars
     double cur_acc_prob = 0.0;
-    for (size_t index = 0; index < log_prob.size(); index++) {
+    for (size_t index = 0; index < log_prob.size(); index++)
+    {
       auto c = log_prob_idx[index];
       float log_prob_c = log_prob[index];
       cur_acc_prob += exp(log_prob_c);
-      if (cur_acc_prob > cutoff_prob && index >= 1) break;
-      for (size_t i = 0; i < prefixes.size() && i < beam_size; ++i) {
+      if (cur_acc_prob > cutoff_prob && index >= 1)
+        break;
+      for (size_t i = 0; i < prefixes.size() && i < beam_size; ++i)
+      {
         auto prefix = prefixes[i];
-        if (full_beam && log_prob_c + prefix->score < min_cutoff) {
+        if (full_beam && log_prob_c + prefix->score < min_cutoff)
+        {
           break;
         }
         // blank
-        if (c == blank_id) {
+        if (c == blank_id)
+        {
           prefix->log_prob_b_cur =
               log_sum_exp(prefix->log_prob_b_cur, log_prob_c + prefix->score);
           continue;
         }
         // repeated character
-        if (c == prefix->character) {
+        if (c == prefix->character)
+        {
           prefix->log_prob_nb_cur = log_sum_exp(
               prefix->log_prob_nb_cur, log_prob_c + prefix->log_prob_nb_prev);
         }
         // get new prefix
         auto prefix_new = prefix->get_path_trie(c);
-        if (prefix_new != nullptr) {
+        if (prefix_new != nullptr)
+        {
           float log_p = -NUM_FLT_INF;
 
           if (c == prefix->character &&
-              prefix->log_prob_b_prev > -NUM_FLT_INF) {
+              prefix->log_prob_b_prev > -NUM_FLT_INF)
+          {
             log_p = log_prob_c + prefix->log_prob_b_prev;
-          } else if (c != prefix->character) {
+          }
+          else if (c != prefix->character)
+          {
             log_p = log_prob_c + prefix->score;
           }
 
           // language model scoring
           if (ext_scorer != nullptr &&
-              (c == space_id || ext_scorer->is_character_based())) {
+              (c == space_id || ext_scorer->is_character_based()))
+          {
             PathTrie *prefix_to_score = nullptr;
             // skip scoring the space
-            if (ext_scorer->is_character_based()) {
+            if (ext_scorer->is_character_based())
+            {
               prefix_to_score = prefix_new;
-            } else {
+            }
+            else
+            {
               prefix_to_score = prefix;
             }
             float score = 0.0;
@@ -138,20 +159,22 @@ std::vector<std::pair<double, std::vector<int>>> ctc_beam_search_decoder(
           prefix_new->log_prob_nb_cur =
               log_sum_exp(prefix_new->log_prob_nb_cur, log_p);
         }
-      }  // end of loop over prefix
-    }    // end of loop over vocabulary
+      } // end of loop over prefix
+    }   // end of loop over vocabulary
     prefixes.clear();
     // update log probs
     root.iterate_to_vec(prefixes);
     // only preserve top beam_size prefixes
-    if (prefixes.size() >= beam_size) {
+    if (prefixes.size() >= beam_size)
+    {
       std::nth_element(prefixes.begin(), prefixes.begin() + beam_size,
                        prefixes.end(), prefix_compare);
-      for (size_t i = beam_size; i < prefixes.size(); ++i) {
+      for (size_t i = beam_size; i < prefixes.size(); ++i)
+      {
         prefixes[i]->remove();
       }
     }
-  }  // end of loop over time
+  } // end of loop over time
   size_t num_prefixes = std::min(prefixes.size(), beam_size);
   std::sort(prefixes.begin(), prefixes.begin() + num_prefixes, prefix_compare);
   return get_beam_search_result(prefixes, beam_size);
@@ -159,19 +182,26 @@ std::vector<std::pair<double, std::vector<int>>> ctc_beam_search_decoder(
 
 std::string map_sent(const std::vector<int> &sent,
                      const std::vector<std::string> &vocabulary, bool greedy,
-                     int blank_id) {
+                     int blank_id)
+{
   std::string output_str;
 
-  if (!greedy) {
-    for (size_t j = 0; j < sent.size(); j++) {
+  if (!greedy)
+  {
+    for (size_t j = 0; j < sent.size(); j++)
+    {
       output_str += vocabulary[sent[j]];
     }
-  } else {
+  }
+  else
+  {
     // greedy search
     int prev = -1;
-    for (size_t i = 0; i < sent.size(); i++) {
+    for (size_t i = 0; i < sent.size(); i++)
+    {
       int cur = sent[i];
-      if (cur != prev && cur != blank_id) output_str += vocabulary[cur];
+      if (cur != prev && cur != blank_id)
+        output_str += vocabulary[cur];
       prev = cur;
     }
   }
@@ -181,17 +211,20 @@ std::string map_sent(const std::vector<int> &sent,
 std::vector<std::string> map_batch(
     const std::vector<std::vector<int>> &batch_sents,
     const std::vector<std::string> &vocabulary, size_t num_processes,
-    bool greedy, int blank_id) {
+    bool greedy, int blank_id)
+{
   ThreadPool pool(num_processes);
   size_t batch_size = batch_sents.size();
   std::vector<std::future<std::string>> res;
-  for (size_t i = 0; i < batch_size; ++i) {
+  for (size_t i = 0; i < batch_size; ++i)
+  {
     res.emplace_back(pool.enqueue(map_sent, std::ref(batch_sents[i]),
                                   std::ref(vocabulary), greedy, blank_id));
   }
   // get decoding results
   std::vector<std::string> batch_results;
-  for (size_t i = 0; i < batch_size; ++i) {
+  for (size_t i = 0; i < batch_size; ++i)
+  {
     batch_results.emplace_back(res[i].get());
   }
   return batch_results;
@@ -203,26 +236,29 @@ ctc_beam_search_decoder_batch(
     const std::vector<std::vector<std::vector<int>>> &batch_log_probs_idx,
     const std::vector<bool> &batch_start, size_t beam_size,
     size_t num_processes, int blank_id, int space_id, double cutoff_prob,
-    Scorer *ext_scorer) {
+    Scorer *ext_scorer)
+{
 
   // number of samples
   size_t batch_size = batch_log_probs_seq.size();
 
   // pathtrie root
   std::vector<PathTrie *> batch_root_trie(batch_size, nullptr);
-  for (size_t i = 0; i < batch_size; i++) {
+  for (size_t i = 0; i < batch_size; i++)
+  {
     batch_root_trie[i] = new PathTrie();
   }
 
   // thread pool
   ThreadPool pool(num_processes);
-  
+
   // enqueue the tasks of decoding
 
   std::vector<std::future<std::vector<std::pair<double, std::vector<int>>>>>
       res;
 
-  for (size_t i = 0; i < batch_size; ++i) {
+  for (size_t i = 0; i < batch_size; ++i)
+  {
     res.emplace_back(
         pool.enqueue(ctc_beam_search_decoder, std::ref(batch_log_probs_seq[i]),
                      std::ref(batch_log_probs_idx[i]),
@@ -232,14 +268,16 @@ ctc_beam_search_decoder_batch(
 
   // get decoding results
   std::vector<std::vector<std::pair<double, std::vector<int>>>> batch_results;
-  for (size_t i = 0; i < batch_size; ++i) {
+  for (size_t i = 0; i < batch_size; ++i)
+  {
     batch_results.emplace_back(res[i].get());
   }
 
   // release the pathtrie root memory
-  for (size_t i = 0; i < batch_size; i++) {
-      delete batch_root_trie[i];
+  for (size_t i = 0; i < batch_size; i++)
+  {
+    delete batch_root_trie[i];
   }
-  
+
   return batch_results;
 }

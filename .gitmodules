@@ -4,3 +4,6 @@
 [submodule "3rd_party/ThreadPool"]
 	path = 3rd_party/ThreadPool
 	url = https://github.com/progschj/ThreadPool.git
+[submodule "3rd_party/openfst"]
+	path = 3rd_party/openfst
+	url = https://github.com/kkm000/openfst.git

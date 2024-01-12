@@ -33,11 +33,13 @@ const std::string UNK_TOKEN = "<unk>";
 const std::string END_TOKEN = "</s>";
 
 // Implement a callback to retrive the dictionary of language model.
-class RetriveStrEnumerateVocab : public lm::EnumerateVocab {
- public:
+class RetriveStrEnumerateVocab : public lm::EnumerateVocab
+{
+public:
   RetriveStrEnumerateVocab() {}
 
-  void Add(lm::WordIndex index, const StringPiece &str) {
+  void Add(lm::WordIndex index, const StringPiece &str)
+  {
     vocabulary.push_back(std::string(str.data(), str.length()));
   }
 
@@ -53,5 +55,4 @@ class RetriveStrEnumerateVocab : public lm::EnumerateVocab {
  *     scorer.get_sent_log_prob({ "WORD1", "WORD2", "WORD3" });
  */
 
-
-#endif  // SCORER_H_
+#endif // SCORER_H_

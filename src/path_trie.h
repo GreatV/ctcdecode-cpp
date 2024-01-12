@@ -26,28 +26,29 @@
 /* Trie tree for prefix storing and manipulating, with a dictionary in
  * finite-state transducer for spelling correction.
  */
-class PathTrie {
- public:
+class PathTrie
+{
+public:
   PathTrie();
   ~PathTrie();
 
   // get new prefix after appending new char
-  PathTrie* get_path_trie(int new_char, bool reset = true);
+  PathTrie *get_path_trie(int new_char, bool reset = true);
 
   // get the prefix in index from root to current node
-  PathTrie* get_path_vec(std::vector<int>& output);
+  PathTrie *get_path_vec(std::vector<int> &output);
 
   // get the prefix in index from some stop node to current nodel
-  PathTrie* get_path_vec(std::vector<int>& output, int stop,
+  PathTrie *get_path_vec(std::vector<int> &output, int stop,
                          size_t max_steps = std::numeric_limits<size_t>::max());
 
   // update log probs
-  void iterate_to_vec(std::vector<PathTrie*>& output);
+  void iterate_to_vec(std::vector<PathTrie *> &output);
 
-  void iterate_to_vec_only(std::vector<PathTrie*>& output);
+  void iterate_to_vec_only(std::vector<PathTrie *> &output);
 
   // set dictionary for FST
-  void set_dictionary(fst::StdVectorFst* dictionary);
+  void set_dictionary(fst::StdVectorFst *dictionary);
 
   void set_matcher(std::shared_ptr<fst::SortedMatcher<fst::StdVectorFst>>);
 
@@ -63,20 +64,20 @@ class PathTrie {
   float score;
   float approx_ctc;
   int character;
-  PathTrie* parent;
+  PathTrie *parent;
 
- private:
+private:
   int ROOT_;
   bool exists_;
   bool has_dictionary_;
 
-  std::vector<std::pair<int, PathTrie*>> children_;
+  std::vector<std::pair<int, PathTrie *>> children_;
 
   // pointer to dictionary of FST
-  fst::StdVectorFst* dictionary_;
+  fst::StdVectorFst *dictionary_;
   fst::StdVectorFst::StateId dictionary_state_;
   // true if finding ars in FST
   std::shared_ptr<fst::SortedMatcher<fst::StdVectorFst>> matcher_;
 };
 
-#endif  // PATH_TRIE_H
+#endif // PATH_TRIE_H
